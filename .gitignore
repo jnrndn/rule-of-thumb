@@ -18,6 +18,5 @@
 .env.test.local
 .env.production.local
 .prettierrc
-.eslintrc
 
 npm-debug.log*
