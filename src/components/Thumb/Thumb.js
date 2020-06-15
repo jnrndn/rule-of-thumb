@@ -1,35 +1,14 @@
 import React from "react"
-import { makeStyles } from "@material-ui/core/styles"
 import Checkbox from "@material-ui/core/Checkbox"
+import Radio from "@material-ui/core/Radio"
 import ThumbDownIcon from "@material-ui/icons/ThumbDown"
 import ThumbUpIcon from "@material-ui/icons/ThumbUp"
-import palette from "./../../theme/palette"
-
-const useStyles = makeStyles({
-  root: {
-    width: "100%",
-  },
-  thumbsDown: {
-    backgroundColor: palette.secondary,
-    borderRadius: 0,
-    "& .MuiCheckbox-root": {
-      color: "white",
-    },
-  },
-  thumbsUp: {
-    backgroundColor: palette.primary,
-    borderRadius: 0,
-  },
-  icon: {
-    fontSize: 12,
-    color: "white",
-  },
-})
+import { useStyles } from "./styles"
 
 const ThumbUp = ({ iconStyle, ...props }) => {
   const classes = useStyles()
   return (
-    <Checkbox
+    <Radio
       {...props}
       className={classes.thumbsUp}
       icon={<ThumbUpIcon className={classes.icon} style={iconStyle} />}
@@ -42,7 +21,7 @@ const ThumbUp = ({ iconStyle, ...props }) => {
 const ThumbDown = ({ iconStyle, ...props }) => {
   const classes = useStyles()
   return (
-    <Checkbox
+    <Radio
       {...props}
       className={classes.thumbsDown}
       icon={<ThumbDownIcon className={classes.icon} style={iconStyle} />}
