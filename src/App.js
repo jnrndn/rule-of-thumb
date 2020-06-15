@@ -1,14 +1,19 @@
 import React from "react"
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom"
-import Home from "./containers/Home/Home"
 
-function App() {
+import Content from "./containers/Content/Content"
+import Navbar from "./containers/Navbar/Navbar"
+import PastTrails from "./containers/PastTrails/PastTrails"
+
+const App = () => {
   return (
-    <Router>
-      <Switch>
-        <Route path="/" component={Home} />
-      </Switch>
-    </Router>
+    <Switch>
+      <Route path="/past-trails" component={PastTrails} />
+      <Route path="/how-it-works" component={Navbar} />
+      <Route path="/log-in" component={Navbar} />
+      <Route path="/" component={Content} />
+      <Route path="*" component={Content} />
+    </Switch>
   )
 }
 
