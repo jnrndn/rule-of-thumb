@@ -1,77 +1,90 @@
-import React, { useState } from "react"
-import { makeStyles } from "@material-ui/core/styles"
+import React, { useState, useEffect } from "react"
+import { connect } from "react-redux"
 import FormGroup from "@material-ui/core/FormGroup"
+import RadioGroup from "@material-ui/core/RadioGroup"
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Typography from "@material-ui/core/Typography"
-import palette from "./../../theme/palette"
+import Button from "@material-ui/core/Button"
 import { ThumbUp, ThumbDown } from "../Thumb/Thumb"
+import { useStyles } from "./styles"
+import clsx from "clsx"
 
-const useStyles = makeStyles({
-  root: {
-    width: "100%",
-  },
-  cardContainer: {
-    height: 600,
-    backgroundImage: (props) => `url(${props.backgroundImage})`,
-    backgroundPosition: "center",
-    backgroundSize: "cover",
-    backgroundRepeat: "no-repeat",
-  },
-  cardOpacity: {
-    height: "100%",
-    backgroundColor: palette.transparent.bg,
-  },
-  content: {
-    paddingTop: 295,
-    color: "white",
-  },
-  title: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    height: 50,
-  },
-  thumbsDown: {
-    backgroundColor: palette.secondary,
-    borderRadius: 0,
-    "& .MuiCheckbox-root": {
-      color: "white",
-    },
-  },
-  thumbsUp: {
-    backgroundColor: palette.primary,
-    borderRadius: 0,
-  },
-  iconContainer: {
-    paddingLeft: 12,
-  },
-  icon: {
-    fontSize: 12,
-    color: "white",
-  },
-  info: {
-    marginLeft: 40,
-  },
-})
+import { upVote, downVote } from "../../store/actions"
 
-const Card = ({ name, date, section, description, image }) => {
+const Card = ({
+  id,
+  name,
+  date,
+  section,
+  description,
+  image,
+  setUpVote,
+  setDownVote,
+  celebrity,
+}) => {
   const styleProps = { backgroundImage: image }
 
   const classes = useStyles(styleProps)
 
+  const [voted, setVoted] = useState(false)
   const [votedIcon, setVotedIcon] = useState(true)
+  const [value, setValue] = useState("")
+  const [checked, setChecked] = useState({
+    up: false,
+    down: false,
+  })
+  const [percent, setPercentage] = useState({
+    up: 0,
+    down: 0,
+  })
+
+  useEffect(() => {
+    if (celebrity) {
+      calculatePercentage()
+    }
+  }, [celebrity])
 
   const setIcon = () => {
-    const vote = {
-      up: true,
-    }
-    if (votedIcon) {
-      if (vote.up) {
+    if (celebrity) {
+      if (celebrity.upVotes > celebrity.downVotes) {
         return <ThumbUp />
       } else {
         return <ThumbDown />
       }
     }
+  }
+
+  const setChekedStyle = (prop) => (event) => {
+    setChecked({ [prop]: event.target.checked })
+  }
+
+  const setCheckedValue = (event) => {
+    setValue(event.target.value)
+  }
+
+  const handleVote = (id) => (event) => {
+    setVoted(true)
+    if (value === "up") {
+      setUpVote(id, celebrity.upVotes + 1)
+    }
+    if (value === "down") {
+      setDownVote(id, celebrity.downVotes + 1)
+    }
+  }
+
+  const handleVoteAgain = () => {
+    setVoted(false)
+  }
+
+  const calculatePercentage = () => {
+    const total = celebrity.upVotes + celebrity.downVotes
+    const upPercent = (celebrity.upVotes * 100) / total
+    const downPercent = (celebrity.downVotes * 100) / total
+    setPercentage((prevState) => ({
+      ...prevState,
+      down: downPercent,
+      up: upPercent,
+    }))
   }
 
   return (
@@ -86,17 +99,70 @@ const Card = ({ name, date, section, description, image }) => {
           </div>
           <div className={classes.info}>
             <Typography variant="body1">{`${date} in ${section}`}</Typography>
-            <Typography variant="body1" style={{ width: "50%" }}>
-              {description}
-            </Typography>
-            <FormGroup row className={classes.iconContainer}>
+
+            {!voted ? (
+              <div>
+                <Typography variant="body1" className={classes.description}>
+                  {description}
+                </Typography>
+                <FormGroup row className={classes.iconContainer}>
+                  <RadioGroup row value={value} onChange={setCheckedValue}>
+                    <FormControlLabel
+                      className={clsx(
+                        classes.thumbsUp,
+                        checked.up && classes.checked
+                      )}
+                      value="up"
+                      control={<ThumbUp onChange={setChekedStyle("up")} />}
+                    />
+                    <FormControlLabel
+                      className={clsx(
+                        classes.thumbsDown,
+                        checked.down && classes.checked
+                      )}
+                      value="down"
+                      control={<ThumbDown onChange={setChekedStyle("down")} />}
+                    />
+                  </RadioGroup>
+                  <Button
+                    type="submit"
+                    onClick={handleVote(id)}
+                    className={classes.voteButton}
+                  >
+                    Vote Now
+                  </Button>
+                </FormGroup>
+              </div>
+            ) : (
+              <div>
+                <Typography variant="body1" className={classes.description}>
+                  Thanks for Voting!
+                </Typography>
+                <Button
+                  onClick={handleVoteAgain}
+                  className={classes.voteButton}
+                >
+                  Vote Again
+                </Button>
+              </div>
+            )}
+          </div>
+          <div className={classes.percentageBar}>
+            <FormGroup row>
               <FormControlLabel
                 className={classes.thumbsUp}
-                control={<ThumbUp />}
+                style={{ margin: 0, width: `${percent.up}%` }}
+                control={
+                  <ThumbUp iconStyle={{ fontSize: 20 }} label="Testing" />
+                }
+                label={`${Math.round(percent.up)}%`}
               />
               <FormControlLabel
                 className={classes.thumbsDown}
-                control={<ThumbDown />}
+                style={{ margin: 0, width: `${percent.down}%` }}
+                control={<ThumbDown iconStyle={{ fontSize: 20 }} />}
+                label={`${Math.round(percent.down)}%`}
+                labelPlacement="start"
               />
             </FormGroup>
           </div>
@@ -105,5 +171,19 @@ const Card = ({ name, date, section, description, image }) => {
     </div>
   )
 }
+const mapStateToProps = (state, ownProps) => {
+  const { id } = ownProps
+  const celebrity = state.celebrities.find((celeb) => celeb.id === id)
+  return { celebrity }
+}
 
-export default Card
+const mapDispatchToProps = (dispatch) => ({
+  setUpVote: (id, newState) => {
+    dispatch(upVote({ id, newState }))
+  },
+  setDownVote: (id, newState) => {
+    dispatch(downVote({ id, newState }))
+  },
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Card)
