@@ -1,17 +1,27 @@
 import React from "react"
 import ReactDOM from "react-dom"
+import { BrowserRouter as Router, Route } from "react-router-dom"
+import { Provider } from "react-redux"
+
 import { ThemeProvider } from "@material-ui/styles"
 import CssBaseline from "@material-ui/core/CssBaseline"
+
 import theme from "./theme"
 import App from "./App"
 import * as serviceWorker from "./serviceWorker"
 
+import store from "./store/index"
+
 ReactDOM.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <Router>
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <App />
+        </ThemeProvider>
+      </Provider>
+    </Router>
   </React.StrictMode>,
   document.getElementById("root")
 )
